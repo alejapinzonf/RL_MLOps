@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import pandas as pd
 import mlflow
-
+import os
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -142,8 +142,14 @@ def log_metric_level_validation(validation_report: dict):
 
 
 def log_run_tags(validation_report: dict):
+    benchmark_id = os.environ.get("BENCHMARK_ID", "single_run")
+    run_group = os.environ.get("RUN_GROUP", "local_pipeline")
+
     mlflow.set_tag("project", "rl_mlops_historical_validation")
     mlflow.set_tag("pipeline_stage", "local_training_validation")
+    mlflow.set_tag("benchmark_id", benchmark_id)
+    mlflow.set_tag("run_group", run_group)
+
     mlflow.set_tag("final_status", validation_report.get("final_status"))
     mlflow.set_tag("algorithm", validation_report.get("algorithm"))
     mlflow.set_tag("scenario", validation_report.get("scenario"))
