@@ -1,0 +1,32 @@
+default_mode: normal
+
+min_history_runs: 2
+
+validation_modes:
+  strict:
+    std_factor: 0.5
+  normal:
+    std_factor: 1.0
+  flexible:
+    std_factor: 1.5
+
+metrics:
+  success_rate:
+    higher_is_better: true
+    required: true
+
+  avg_reward:
+    higher_is_better: true
+    required: true
+
+  first_reach_step:
+    higher_is_better: false
+    required: false
+
+  collisions:
+    higher_is_better: false
+    required: false
+
+  avg_steps:
+    higher_is_better: false
+    required: false

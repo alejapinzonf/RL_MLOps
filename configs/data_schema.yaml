@@ -1,0 +1,90 @@
+standard_columns:
+  run_id:
+    type: string
+    required: true
+    description: "Identificador único de la corrida."
+
+  algorithm:
+    type: string
+    required: true
+    allowed_values:
+      - q_learning
+      - dqn
+      - sac
+    description: "Algoritmo usado por el agente."
+
+  scenario:
+    type: string
+    required: true
+    allowed_values:
+      - wall
+      - l_shape
+      - u_shape
+    description: "Tipo de escenario u obstáculo."
+
+  reward_version:
+    type: string
+    required: true
+    allowed_values:
+      - reward_v1_base
+      - reward_v2_step_penalty
+      - reward_v3_collision_penalty
+    description: "Versión de la función de recompensa."
+
+  success_rate:
+    type: float
+    required: true
+    range:
+      min: 0.0
+      max: 1.0
+    description: "Porcentaje de éxito normalizado entre 0 y 1."
+
+  avg_reward:
+    type: float
+    required: true
+    description: "Recompensa promedio obtenida."
+
+  first_reach_step:
+    type: float
+    required: false
+    description: "Paso promedio en el que el agente alcanza la meta por primera vez."
+
+  collisions:
+    type: float
+    required: false
+    description: "Promedio o total de colisiones, según el resumen histórico."
+
+  avg_steps:
+    type: float
+    required: false
+    description: "Número promedio de pasos por episodio."
+
+  training_time_sec:
+    type: float
+    required: false
+    description: "Tiempo de entrenamiento en segundos."
+
+  episodes:
+    type: int
+    required: false
+    description: "Número de episodios de entrenamiento o evaluación."
+
+  seed:
+    type: int
+    required: false
+    description: "Semilla aleatoria usada en la corrida."
+
+  source_file:
+    type: string
+    required: false
+    description: "Archivo original desde donde se cargó el resultado."
+
+  created_at:
+    type: string
+    required: false
+    description: "Fecha de creación o procesamiento del registro."
+
+  notes:
+    type: string
+    required: false
+    description: "Notas adicionales."

@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated data
+data/interim/*
+data/processed/*
+data/new_runs/*
+
+# Generated models and checkpoints
+models/checkpoints/*
+models/candidate/*
+models/approved/*
+
+# Generated reports
+reports/training/*
+reports/validation/*
+
+# MLflow, later
+mlruns/
+mlartifacts/
+
+# DVC cache, later
+.dvc/cache/
+.dvc/tmp/
+
+# Keep folder structure
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/new_runs/.gitkeep
+!models/checkpoints/.gitkeep
+!models/candidate/.gitkeep
+!models/approved/.gitkeep
+!reports/training/.gitkeep
+!reports/validation/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db

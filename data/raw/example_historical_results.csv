@@ -1,0 +1,10 @@
+run_id,algorithm,scenario,reward_version,success_rate,avg_reward,first_reach_step,collisions,avg_steps,training_time_sec,episodes,seed,notes
+hist_001,q_learning,wall,reward_v1_base,0.92,180.5,45,2,60,120,1000,42,baseline q-learning wall
+hist_002,q_learning,wall,reward_v1_base,0.89,172.3,50,3,65,118,1000,43,baseline q-learning wall
+hist_003,dqn,wall,reward_v1_base,0.94,195.2,38,1,55,300,1000,44,dqn wall
+hist_004,dqn,l_shape,reward_v1_base,0.78,130.1,85,6,110,340,1000,45,dqn l shape
+hist_005,sac,u_shape,reward_v1_base,0.70,115.4,100,8,130,500,1000,46,sac u shape
+hist_006,q_learning,l_shape,reward_v2_step_penalty,0.82,145.7,72,4,95,130,1000,47,q-learning l shape reward v2
+hist_007,dqn,u_shape,reward_v2_step_penalty,0.76,128.9,90,7,120,360,1000,48,dqn u shape reward v2
+hist_008,sac,wall,reward_v3_collision_penalty,0.88,160.2,58,2,75,520,1000,49,sac wall reward v3
+
