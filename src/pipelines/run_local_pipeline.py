@@ -22,9 +22,9 @@ def run_step(step_name: str, command: list[str]):
     Ejecuta un paso del pipeline y detiene todo si algo falla.
     """
 
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 70)
     print(f"Ejecutando paso: {step_name}")
-    print("=" * 60)
+    print("=" * 70)
 
     print("Comando:")
     print(" ".join(command))
@@ -43,7 +43,7 @@ def run_step(step_name: str, command: list[str]):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Pipeline local para entrenamiento demo y validación histórica RL."
+        description="Pipeline local RL MLOps con entrenamiento, validación y MLflow."
     )
 
     parser.add_argument(
@@ -95,12 +95,17 @@ def parse_args() -> argparse.Namespace:
         help="Semilla aleatoria.",
     )
 
+    parser.add_argument(
+        "--skip-mlflow",
+        action="store_true",
+        help="Si se usa, no registra la corrida en MLflow.",
+    )
+
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-
     python_executable = sys.executable
 
     run_step(
@@ -152,9 +157,18 @@ def main():
         ],
     )
 
-    print("\n" + "=" * 60)
+    if not args.skip_mlflow:
+        run_step(
+            step_name="Registro en MLflow",
+            command=[
+                python_executable,
+                "src/tracking/log_to_mlflow.py",
+            ],
+        )
+
+    print("\n" + "=" * 70)
     print("Pipeline local completado correctamente.")
-    print("=" * 60)
+    print("=" * 70)
 
     print("\nArchivos principales generados:")
     print("- data/interim/historical_loaded.csv")
@@ -164,6 +178,10 @@ def main():
     print("- models/candidate/")
     print("- reports/training/")
     print("- reports/validation/validation_result.json")
+
+    if not args.skip_mlflow:
+        print("- mlflow.db")
+        print("- MLflow experiment: rl_historical_validation")
 
 
 if __name__ == "__main__":
