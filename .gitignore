@@ -48,3 +48,5 @@ mlflow.db
 # OS
 .DS_Store
 Thumbs.db
+reports/friendly/*
+!reports/friendly/.gitkeep

@@ -3,12 +3,17 @@ from datetime import datetime
 import argparse
 import random
 import pandas as pd
+import sys
 
 from checkpoint_utils import save_checkpoint, save_final_model
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SRC_DIR = PROJECT_ROOT / "src"
 
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from training.checkpoint_utils import save_checkpoint, save_final_model
 NEW_RUNS_DIR = PROJECT_ROOT / "data" / "new_runs"
 NEW_RUN_PATH = NEW_RUNS_DIR / "new_run_demo.csv"
 
@@ -144,13 +149,6 @@ def simulate_training_curve(
     episodes: int,
     seed: int | None = None,
 ) -> list[dict]:
-    """
-    Simula métricas por episodio.
-
-    La idea es que al inicio el agente se comporte peor,
-    y poco a poco se acerque a las métricas objetivo.
-    """
-
     if seed is not None:
         random.seed(seed)
 
