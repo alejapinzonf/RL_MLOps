@@ -9,6 +9,8 @@ on:
 jobs:
   train-and-report:
     runs-on: self-hosted
+    env:
+      PATH: /home/aleja/.npm-global/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
