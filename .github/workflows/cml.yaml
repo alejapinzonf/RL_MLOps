@@ -1,0 +1,117 @@
+name: CML Training Report
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  train-and-report:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python virtual environment
+        run: |
+          python3.12 -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install pandas numpy matplotlib pyyaml mlflow openpyxl torch dvc
+
+      - name: Pull data and artifacts from DVC
+        run: |
+          source .venv/bin/activate
+          dvc pull data/raw/paper_excels.dvc
+
+      - name: Build historical dataset from paper excels
+        run: |
+          source .venv/bin/activate
+          python src/data/import_paper_excels.py
+
+      - name: Load and clean historical data
+        run: |
+          source .venv/bin/activate
+          python src/data/load_data.py
+          python src/data/clean_data.py
+
+      - name: Train Q-learning (paper environment, short run)
+        run: |
+          source .venv/bin/activate
+          python src/training/train_q_learning_paper.py \
+            --scenario wall \
+            --episodes 5000 \
+            --checkpoint-interval 2500 \
+            --seed 42
+
+      - name: Validate against historical runs
+        run: |
+          source .venv/bin/activate
+          python src/validation/validate_run.py
+
+      - name: Evaluate convergence
+        run: |
+          source .venv/bin/activate
+          python src/evaluation/evaluate_run.py
+
+      - name: Generate friendly report
+        run: |
+          source .venv/bin/activate
+          python src/reporting/generate_run_report.py
+
+      - name: Build CML comment
+        run: |
+          source .venv/bin/activate
+
+          RUN_ID=$(python -c "import pandas as pd; print(pd.read_csv('data/new_runs/new_run_demo.csv').iloc[0]['run_id'])")
+          FIGURE_DIR="reports/friendly/${RUN_ID}"
+
+          echo "## Training run report: \`${RUN_ID}\`" > cml_report.md
+          echo "" >> cml_report.md
+
+          echo "### Final performance metrics" >> cml_report.md
+          echo "" >> cml_report.md
+          python -c "
+          import pandas as pd
+          df = pd.read_csv('data/new_runs/new_run_demo.csv').iloc[0]
+          cols = ['algorithm', 'scenario', 'reward_version', 'episodes', 'success_rate', 'avg_reward', 'first_reach_step', 'collisions']
+          print('| Metric | Value |')
+          print('|---|---|')
+          for c in cols:
+              print(f'| {c} | {df[c]} |')
+          " >> cml_report.md
+          echo "" >> cml_report.md
+
+          echo "### Validation and convergence" >> cml_report.md
+          echo "" >> cml_report.md
+          python -c "
+          import json
+          with open('reports/validation/validation_result.json') as f:
+              v = json.load(f)
+          print(f\"- **Historical validation status**: \`{v.get('final_status', 'unknown')}\`\")
+          print(f\"- **Historical runs used**: {v.get('history_rows_used', 0)}\")
+          try:
+              with open('reports/evaluation/evaluation_result.json') as f:
+                  e = json.load(f)
+              print(f\"- **Training status (convergence)**: \`{e.get('training_status', 'unknown')}\`\")
+              print(f\"- **Final recommendation**: \`{e.get('final_recommendation', 'unknown')}\`\")
+          except FileNotFoundError:
+              pass
+          " >> cml_report.md
+          echo "" >> cml_report.md
+
+          echo "### Training curves" >> cml_report.md
+          echo "" >> cml_report.md
+          if [ -f "${FIGURE_DIR}/episode_reward.png" ]; then
+            cml asset publish "${FIGURE_DIR}/episode_reward.png" --md >> cml_report.md
+          fi
+          if [ -f "${FIGURE_DIR}/success_rate_moving.png" ]; then
+            cml asset publish "${FIGURE_DIR}/success_rate_moving.png" --md >> cml_report.md
+          fi
+
+      - name: Post CML comment
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          source .venv/bin/activate

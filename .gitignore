@@ -64,3 +64,6 @@ reports/evaluation/*
 # Pytest cache
 .pytest_cache/
 /mlruns
+
+# Self-hosted runner (debe vivir fuera del repo)
+actions-runner/
