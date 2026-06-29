@@ -60,3 +60,6 @@ data/raw/historical_results_paper.csv
 # Reportes de evaluación generados
 reports/evaluation/*
 !reports/evaluation/.gitkeep
+
+# Pytest cache
+.pytest_cache/
