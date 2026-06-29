@@ -1,0 +1,6 @@
+outs:
+- md5: 9d65eab5735a678e9510940bcc8252b5.dir
+  size: 93090502
+  nfiles: 65
+  hash: md5
+  path: candidate

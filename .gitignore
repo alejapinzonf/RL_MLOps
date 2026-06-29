@@ -63,3 +63,4 @@ reports/evaluation/*
 
 # Pytest cache
 .pytest_cache/
+/mlruns
