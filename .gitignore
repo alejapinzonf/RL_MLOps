@@ -50,3 +50,13 @@ mlflow.db
 Thumbs.db
 reports/friendly/*
 !reports/friendly/.gitkeep
+
+# Excels reales del paper (pesados) - se gestionan con DVC más adelante
+data/raw/paper_excels/*.xlsx
+
+# Histórico generado a partir de los excels del paper
+data/raw/historical_results_paper.csv
+
+# Reportes de evaluación generados
+reports/evaluation/*
+!reports/evaluation/.gitkeep
