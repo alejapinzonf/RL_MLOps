@@ -53,14 +53,6 @@ class ReplayBuffer:
 
 
 class DQNAgent:
-    """
-    Agente DQN completo: red de política, red objetivo, optimizador,
-    replay buffer y lógica de selección de acción/entrenamiento.
-
-    Port fiel de la lógica en dqn_wall.py, encapsulado en una clase
-    reutilizable para que train_dqn_paper.py pueda parametrizarlo en
-    vez de depender de constantes globales del script original.
-    """
 
     def __init__(
         self,
