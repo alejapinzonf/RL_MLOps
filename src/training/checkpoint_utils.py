@@ -13,10 +13,7 @@ def save_checkpoint(
     reward_version: str,
     metrics: dict,
 ):
-    """
-    Guarda un checkpoint demo/simulado.
-    Esta función la usa demo_train.py.
-    """
+
 
     run_checkpoint_dir = checkpoint_dir / run_id
     run_checkpoint_dir.mkdir(parents=True, exist_ok=True)
