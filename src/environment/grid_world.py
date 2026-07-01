@@ -11,18 +11,6 @@ class StepResult:
 
 
 class GridWorldEnv:
-    """
-    Entorno de navegación tipo grid para entrenamiento RL.
-
-    Estado:
-        posición del agente codificada como entero.
-
-    Acciones:
-        0 = arriba
-        1 = abajo
-        2 = izquierda
-        3 = derecha
-    """
 
     ACTIONS = {
         0: (-1, 0),
