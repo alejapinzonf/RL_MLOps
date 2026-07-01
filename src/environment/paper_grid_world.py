@@ -13,31 +13,6 @@ class PaperStepResult:
 
 
 class PaperGridWorldEnv:
-    """
-    Entorno de navegación basado en el paper:
-    "Reinforcement Learning-Based Navigation in a Discrete Grid
-    Environment: A Comparative Study of Q-Learning, DQN, and Discrete SAC".
-
-    A diferencia de GridWorldEnv (estado absoluto, posiciones fijas,
-    reward simple), este entorno reproduce fielmente lo usado en el paper:
-
-    - Estado relativo: (dx, dy, dxo, dyo), donde dx/dy es el desplazamiento
-      al goal y dxo/dyo es el desplazamiento al obstáculo más cercano.
-    - 5 acciones: arriba, abajo, izquierda, derecha, quedarse quieto (stay).
-    - Start, goal y obstáculo se generan aleatoriamente en cada episodio.
-    - Reward compuesto (ecuación 10 del paper): progreso hacia el goal,
-      penalización por cercanía a obstáculos, step penalty, premio por
-      llegada, premio/castigo por quedarse quieto dentro/fuera del goal,
-      castigo por colisión, castigo por moverse después de llegar.
-
-    Acciones:
-        0 = arriba    (y + 1)
-        1 = abajo     (y - 1)
-        2 = izquierda (x - 1)
-        3 = derecha   (x + 1)
-        4 = quedarse quieto (stay)
-    """
-
     N_ACTIONS = 5
     STAY_ACTION = 4
 
@@ -105,11 +80,7 @@ class PaperGridWorldEnv:
     def _build_obstacle_candidates(
         self, start: tuple[int, int], goal: tuple[int, int]
     ) -> list[tuple[tuple[int, int], ...]]:
-        """
-        Genera candidatos de celdas de obstáculo entre start y goal,
-        según la geometría del escenario. Réplica de la lógica usada en
-        build_wall_candidates_between de los scripts del paper.
-        """
+
         sx, sy = start
         gx, gy = goal
         abx = gx - sx
@@ -164,10 +135,7 @@ class PaperGridWorldEnv:
     def _candidate_shapes_at(
         self, cx: int, cy: int, length: int
     ) -> list[tuple[tuple[int, int], ...]]:
-        """
-        Genera las formas candidatas de obstáculo centradas/ancladas en
-        (cx, cy), según el escenario configurado.
-        """
+
         if self.scenario == "wall":
             horizontal = tuple((cx, cy + i) for i in range(length))
             vertical = tuple((cx + i, cy) for i in range(length))
@@ -208,11 +176,7 @@ class PaperGridWorldEnv:
         return [tuple(sorted(set(s))) for s in shapes]
 
     def _is_inside_obstacle_region(self, pos: tuple[int, int]) -> bool:
-        """
-        Para u_shape: indica si una posición está en la región interior
-        de la "trampa" delimitada por el obstáculo (bounding box menos
-        las celdas del propio obstáculo). No aplica a wall/l_shape.
-        """
+
         if self.scenario != "u_shape" or not self.obstacle_cells:
             return False
 
