@@ -14,18 +14,9 @@ VALIDATION_REPORT_PATH = PROJECT_ROOT / "reports" / "validation" / "validation_r
 EVALUATION_REPORT_DIR = PROJECT_ROOT / "reports" / "evaluation"
 EVALUATION_REPORT_PATH = EVALUATION_REPORT_DIR / "evaluation_result.json"
 
-# Mínimo de episodios en cada tramo (inicial/final) para que la
-# comparación tenga algún sentido estadístico mínimo.
 MIN_WINDOW_SIZE = 5
-
-# Proporción de episodios usada como tramo inicial y como tramo final.
 WINDOW_FRACTION = 0.2
-
-# Mejora mínima (en proporción, no absoluta) para considerar que una
-# métrica mejoró "de verdad" y no solo por ruido.
 MIN_RELATIVE_IMPROVEMENT = 0.05
-
-# Combinación final: training_status x historical_validation_status -> final_recommendation
 RECOMMENDATION_TABLE = {
     ("converged", "approved"): "approved",
     ("converged", "warning"): "approved",
@@ -40,13 +31,7 @@ RECOMMENDATION_TABLE = {
 
 
 def load_episode_metrics(run_id: str) -> pd.DataFrame:
-    """
-    Carga el CSV de métricas por episodio de una corrida.
 
-    Soporta tanto el esquema de demo_train.py (columna 'success_rate'
-    ya promediada por episodio) como el de train_q_learning.py
-    (columna 'success' binaria por episodio).
-    """
     path = TRAINING_REPORTS_DIR / f"{run_id}_episode_metrics.csv"
 
     if not path.exists():
@@ -95,14 +80,7 @@ def split_windows(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def relative_improvement(initial_value: float, final_value: float, higher_is_better: bool) -> float:
-    """
-    Calcula la mejora relativa entre el tramo inicial y el final.
 
-    Devuelve un valor positivo si hubo mejora (en el sentido indicado
-    por higher_is_better) y negativo si empeoró. Se normaliza por el
-    valor absoluto del tramo inicial para poder compararlo contra
-    MIN_RELATIVE_IMPROVEMENT independientemente de la escala de la métrica.
-    """
     denominator = abs(initial_value) if abs(initial_value) > 1e-9 else 1e-9
 
     raw_delta = final_value - initial_value
@@ -114,13 +92,7 @@ def relative_improvement(initial_value: float, final_value: float, higher_is_bet
 
 
 def evaluate_convergence(df: pd.DataFrame) -> dict:
-    """
-    Evalúa si el agente convergió durante el entrenamiento,
-    comparando el tramo inicial contra el tramo final de episodios.
 
-    Esta evaluación es independiente del histórico: solo mira si la
-    corrida mejoró internamente, sin compararse contra otras corridas.
-    """
     initial_window, final_window = split_windows(df)
 
     initial_avg_reward = float(initial_window["episode_reward"].mean())
@@ -174,15 +146,7 @@ def combine_recommendation(
     training_status: str,
     historical_validation_status: str,
 ) -> str:
-    """
-    Combina el estado de convergencia con el estado de validación
-    histórica en una recomendación final.
 
-    Esto resuelve el problema conceptual del proyecto: una corrida
-    puede converger durante el entrenamiento pero ser rechazada por el
-    histórico (o viceversa). La recomendación final distingue estos
-    casos en lugar de colapsarlos en un solo "rejected".
-    """
     key = (training_status, historical_validation_status)
 
     if key not in RECOMMENDATION_TABLE:
