@@ -1,21 +1,4 @@
-"""
-reward_shaping_advisor.py
-
-Analiza los parámetros de reward de PaperGridWorldEnv ANTES de
-entrenar, comparando las magnitudes relativas entre términos que
-tienen una tensión conceptual conocida (p. ej. premio por llegar vs.
-castigo por chocar). No usa datos históricos: es análisis estático de
-la fórmula, basado en cómo se comportarían las magnitudes dado un
-escenario típico (max_steps episodios sin éxito, navegación normal).
-
-El objetivo es avisar ANTES de entrenar si una combinación de
-parámetros probablemente va a hacer que el agente aprenda un
-comportamiento no deseado (p. ej. ignorar obstáculos, quedarse quieto,
-deambular sin penalización después de llegar al goal).
-"""
-
 from dataclasses import dataclass, field
-
 
 @dataclass
 class RewardWarning:
@@ -23,10 +6,6 @@ class RewardWarning:
     message: str
     ratio: float
 
-
-# Cada regla compara dos cantidades A y B con un significado conceptual
-# de "A no debería dominar tanto a B". El umbral define a partir de qué
-# razón (A/B) se considera riesgoso.
 DOMINANCE_RULES = [
     {
         "name": "arrival_vs_obstacle_hit",
@@ -90,11 +69,6 @@ def _ratio(numerator: float, denominator: float) -> float:
 
 
 def analyze_reward_params(reward_params: dict) -> list[RewardWarning]:
-    """
-    Evalúa los parámetros de reward contra las reglas de dominancia
-    conocidas. Devuelve una lista de RewardWarning (puede estar vacía
-    si no se detecta ningún desbalance relevante).
-    """
     warnings: list[RewardWarning] = []
 
     for rule in DOMINANCE_RULES:
@@ -153,7 +127,6 @@ def format_warnings(warnings: list[RewardWarning]) -> str:
 
 
 def main():
-    """Modo CLI: permite revisar un set de parámetros sin entrenar."""
     import argparse
 
     parser = argparse.ArgumentParser(
