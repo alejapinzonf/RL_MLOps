@@ -11,9 +11,6 @@ SUPPORTED_EXTENSIONS = [".csv", ".xlsx"]
 
 
 def find_data_files(raw_data_dir: Path) -> list[Path]:
-    """
-    Busca archivos CSV y Excel dentro de data/raw.
-    """
     files = []
 
     for extension in SUPPORTED_EXTENSIONS:
@@ -23,9 +20,6 @@ def find_data_files(raw_data_dir: Path) -> list[Path]:
 
 
 def read_file(file_path: Path) -> pd.DataFrame:
-    """
-    Lee un archivo CSV o Excel y retorna un DataFrame.
-    """
     if file_path.suffix == ".csv":
         df = pd.read_csv(file_path)
 
@@ -40,9 +34,6 @@ def read_file(file_path: Path) -> pd.DataFrame:
 
 
 def load_historical_data(raw_data_dir: Path) -> pd.DataFrame:
-    """
-    Carga todos los archivos históricos encontrados en data/raw.
-    """
     files = find_data_files(raw_data_dir)
 
     if not files:
