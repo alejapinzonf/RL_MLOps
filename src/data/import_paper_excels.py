@@ -5,24 +5,10 @@ import re
 import pandas as pd
 import openpyxl
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-# Carpeta donde se colocan los .xlsx originales del paper, ya renombrados
-# con el patrón: experimento<N>_<algoritmo>_<obstaculo>.xlsx
 PAPER_EXCELS_DIR = PROJECT_ROOT / "data" / "raw" / "paper_excels"
-
-# Salida 1: histórico resumen, en el mismo formato que espera clean_data.py
 PAPER_HISTORICAL_OUTPUT = PROJECT_ROOT / "data" / "raw" / "historical_results_paper.csv"
-
-# Salida 2: episodios completos por corrida, listos para evaluate_run.py /
-# generate_run_report.py (mismo formato que generan demo_train.py /
-# train_q_learning.py).
 TRAINING_REPORTS_DIR = PROJECT_ROOT / "reports" / "training"
-
-# Proporción final de episodios usada para calcular el resumen "ya entrenado"
-# de cada corrida. Se evita promediar desde el episodio 1 (epsilon=1.0,
-# agente sin entrenar todavía), que distorsionaría el histórico hacia abajo.
 SUMMARY_WINDOW_FRACTION = 0.10
 MIN_SUMMARY_WINDOW = 50
 
