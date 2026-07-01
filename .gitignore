@@ -67,3 +67,5 @@ reports/evaluation/*
 
 # Self-hosted runner (debe vivir fuera del repo)
 actions-runner/
+frontend/node_modules/
+frontend-app/

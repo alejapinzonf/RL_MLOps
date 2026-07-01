@@ -210,8 +210,15 @@ function TrainTab() {
   const [training, setTraining] = useState(false);
   const [result, setResult] = useState(null);
   const [apiError, setApiError] = useState(null);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
   const consoleEndRef = useRef(null);
   const debounceRef = useRef(null);
+
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === "Escape") setLightboxSrc(null); };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
 
   useEffect(() => {
     const ep = {};
@@ -277,6 +284,7 @@ function TrainTab() {
   const hasHighWarning = rewardWarnings.some(w => w.severity === "high");
 
   return (
+    <>
     <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
       {/* LEFT: Form */}
       <Card style={{ flex: "1 1 360px", minWidth: 0 }}>
@@ -424,10 +432,55 @@ function TrainTab() {
                 <Metric label="Episodes" value={result.metrics.episodes} />
               </div>
             )}
+            {result.metrics && result.metrics.run_id && (
+              <div style={{ marginTop: 20 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: P.inkSoft, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>Training curves</p>
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  {["episode_reward", "success_rate_moving", "collisions"].map(fig => (
+                    <img
+                      key={fig}
+                      src={`http://localhost:8000/reports/${result.metrics.run_id}/${fig}.png`}
+                      alt={fig}
+                      onClick={() => setLightboxSrc(`http://localhost:8000/reports/${result.metrics.run_id}/${fig}.png`)}
+                      style={{ flex: "1 1 200px", minWidth: 0, borderRadius: 10, border: `1px solid ${P.border}`, cursor: "zoom-in" }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </Card>
         )}
       </div>
     </div>
+
+      {lightboxSrc && (
+        <div
+          onClick={() => setLightboxSrc(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 1000,
+            background: "rgba(20,15,30,0.92)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "zoom-out",
+          }}
+        >
+          <img
+            src={lightboxSrc}
+            alt="enlarged"
+            style={{ maxWidth: "90vw", maxHeight: "88vh", borderRadius: 16, boxShadow: "0 8px 48px rgba(0,0,0,0.6)" }}
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxSrc(null)}
+            style={{
+              position: "absolute", top: 20, right: 24,
+              background: "rgba(255,255,255,0.12)", border: "none",
+              color: "#fff", fontSize: 22, borderRadius: "50%",
+              width: 40, height: 40, cursor: "pointer", lineHeight: 1,
+            }}
+          >✕</button>
+        </div>
+      )}
+    </>
   );
 }
 
