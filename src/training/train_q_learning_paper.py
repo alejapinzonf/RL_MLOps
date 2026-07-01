@@ -218,6 +218,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gamma", type=float, default=0.95)
     parser.add_argument("--epsilon-start", type=float, default=1.0)
     parser.add_argument("--epsilon-end", type=float, default=0.05)
+
+    parser.add_argument("--arrival-reward", type=float, default=150.0)
+    parser.add_argument("--goal-stay-reward", type=float, default=50.0)
+    parser.add_argument("--goal-stay-out-penalty", type=float, default=100.0)
+    parser.add_argument("--step-penalty", type=float, default=1.0)
+    parser.add_argument("--stay-outside-penalty", type=float, default=60.0)
+    parser.add_argument("--obstacle-hit-penalty", type=float, default=100.0)
+    parser.add_argument("--goal-position-scale", type=float, default=2.0)
+    parser.add_argument("--obstacle-position-scale", type=float, default=2.0)
+    parser.add_argument("--arrival-bonus-multiplier", type=float, default=100.0)
     parser.add_argument(
         "--epsilon-decay-fraction",
         type=float,
@@ -248,6 +258,18 @@ def main():
 
     run_id = generate_run_id(args.scenario)
 
+    reward_params = {
+        "arrival_reward": args.arrival_reward,
+        "goal_stay_reward": args.goal_stay_reward,
+        "goal_stay_out_penalty": args.goal_stay_out_penalty,
+        "step_penalty": args.step_penalty,
+        "stay_outside_penalty": args.stay_outside_penalty,
+        "obstacle_hit_penalty": args.obstacle_hit_penalty,
+        "goal_position_scale": args.goal_position_scale,
+        "obstacle_position_scale": args.obstacle_position_scale,
+        "arrival_bonus_multiplier": args.arrival_bonus_multiplier,
+    }
+
     env = PaperGridWorldEnv(
         grid_size=args.grid_size,
         scenario=args.scenario,
@@ -255,6 +277,7 @@ def main():
         max_steps=args.max_steps,
         min_goal_start_distance=args.min_goal_start_distance,
         seed=args.seed,
+        reward_params=reward_params,
     )
 
     q_table = build_q_table(args.grid_size, env.n_actions)

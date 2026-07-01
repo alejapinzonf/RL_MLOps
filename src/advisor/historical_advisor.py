@@ -53,15 +53,17 @@ def advise(
     reward_version: str | None = None,
 ) -> dict:
     """
-    Compara planned_episodes contra el histórico real para el mismo
-    algorithm + scenario (y reward_version si se especifica).
+    Compara planned_episodes contra la distribución real del histórico
+    (percentiles p25/p50/p75) para el mismo algorithm + scenario.
 
-    Devuelve un dict con:
-        - n_matches: cantidad de corridas históricas comparables
-        - historical_episodes_mean / min / max
-        - historical_success_rate_mean
-        - verdict: "no_history" | "likely_insufficient" | "comparable" | "exceeds_history"
-        - message: texto explicativo
+    Clasifica en 4 niveles basados en distribución estadística honesta:
+        - "no_history": sin precedentes comparables
+        - "likely_insufficient": por debajo del p25 histórico
+        - "comparable": entre p25 y p75 histórico
+        - "exceeds_history": por encima del p75 histórico
+
+    También informa sobre la variabilidad del success_rate histórico,
+    para avisar cuando los resultados pasados fueron inconsistentes.
     """
     history = load_available_history()
 
@@ -109,48 +111,72 @@ def advise(
             ),
         }
 
+    # Estadísticas de distribución real
+    hist_p25 = float(episodes_series.quantile(0.25))
+    hist_p50 = float(episodes_series.quantile(0.50))
+    hist_p75 = float(episodes_series.quantile(0.75))
     hist_mean = float(episodes_series.mean())
     hist_min = float(episodes_series.min())
     hist_max = float(episodes_series.max())
+
     success_mean = float(success_series.mean()) if not success_series.empty else None
+    success_std = float(success_series.std()) if len(success_series) > 1 else None
+    high_variance = success_std is not None and success_std > 0.15
 
-    ratio = planned_episodes / hist_mean if hist_mean > 0 else float("inf")
-
-    if ratio < 0.1:
+    # Clasificación basada en percentiles (estadísticamente honesta)
+    if planned_episodes < hist_p25:
         verdict = "likely_insufficient"
+        pct_of_median = (planned_episodes / hist_p50 * 100) if hist_p50 > 0 else 0
         message = (
-            f"Vas a entrenar {algorithm} en {scenario} con {planned_episodes:,} episodios. "
-            f"El histórico real usa en promedio {hist_mean:,.0f} episodios "
-            f"(rango {hist_min:,.0f}–{hist_max:,.0f}) en {len(filtered)} corrida(s) comparables"
-            + (f", con success_rate promedio {success_mean:.3f}" if success_mean is not None else "")
-            + f". Tu plan usa solo {ratio*100:.1f}% de ese promedio — es muy probable que "
-              "el agente no alcance un desempeño comparable."
+            f"Con {planned_episodes:,} episodios estás por debajo del percentil 25 del "
+            f"histórico real para {algorithm}/{scenario} (p25={hist_p25:,.0f}, "
+            f"mediana={hist_p50:,.0f}, p75={hist_p75:,.0f}, n={len(filtered)} corridas). "
+            f"Solo alcanzas el {pct_of_median:.1f}% de la mediana histórica — "
+            f"es probable que el agente no tenga tiempo suficiente para aprender."
         )
-    elif ratio < 0.5:
-        verdict = "likely_insufficient"
-        message = (
-            f"Vas a entrenar {algorithm} en {scenario} con {planned_episodes:,} episodios, "
-            f"bastante por debajo del promedio histórico real ({hist_mean:,.0f} episodios, "
-            f"{len(filtered)} corrida(s) comparables"
-            + (f", success_rate promedio {success_mean:.3f}" if success_mean is not None else "")
-            + "). Es razonable esperar un agente parcialmente entrenado."
-        )
-    elif ratio <= 1.5:
+    elif planned_episodes <= hist_p75:
         verdict = "comparable"
         message = (
-            f"El número de episodios planeado ({planned_episodes:,}) es comparable al "
-            f"histórico real para {algorithm}/{scenario} ({hist_mean:,.0f} episodios "
-            f"promedio, {len(filtered)} corrida(s)"
-            + (f", success_rate promedio {success_mean:.3f}" if success_mean is not None else "")
-            + ")."
+            f"Tus {planned_episodes:,} episodios están dentro del rango habitual "
+            f"para {algorithm}/{scenario} (p25={hist_p25:,.0f}–p75={hist_p75:,.0f}, "
+            f"mediana={hist_p50:,.0f}, n={len(filtered)} corridas). "
+            f"El histórico sugiere que esta cantidad es razonable."
         )
     else:
         verdict = "exceeds_history"
         message = (
-            f"Vas a entrenar con {planned_episodes:,} episodios, más que el promedio "
-            f"histórico ({hist_mean:,.0f}) para {algorithm}/{scenario}. Esto es razonable "
-            "si buscas mejorar sobre el precedente, pero considera el tiempo de cómputo."
+            f"Tus {planned_episodes:,} episodios superan el percentil 75 del histórico "
+            f"para {algorithm}/{scenario} (p75={hist_p75:,.0f}, mediana={hist_p50:,.0f}, "
+            f"n={len(filtered)} corridas). Esto puede mejorar la convergencia, "
+            f"pero considera el tiempo de cómputo adicional."
         )
+
+    if success_mean is not None:
+        message += f" Success rate histórico promedio: {success_mean:.3f}"
+        if success_std is not None:
+            message += f" (±{success_std:.3f})"
+
+    if high_variance:
+        message += (
+            f". ⚠ Alta variabilidad en el histórico (std={success_std:.3f}): "
+            f"los resultados pasados fueron inconsistentes — el desempeño final "
+            f"dependerá fuertemente de la configuración exacta."
+        )
+
+    return {
+        "n_matches": int(len(filtered)),
+        "historical_episodes_mean": hist_mean,
+        "historical_episodes_min": hist_min,
+        "historical_episodes_max": hist_max,
+        "historical_episodes_p25": hist_p25,
+        "historical_episodes_p50": hist_p50,
+        "historical_episodes_p75": hist_p75,
+        "historical_success_rate_mean": success_mean,
+        "historical_success_rate_std": success_std,
+        "high_variance_warning": high_variance,
+        "verdict": verdict,
+        "message": message,
+    }
 
     return {
         "n_matches": int(len(filtered)),
