@@ -24,9 +24,6 @@ VALID_REWARD_VERSIONS = [
 ]
 VALIDATION_MODES = ["strict", "normal", "flexible"]
 
-# Cada trainer define: script a invocar, algorithm fijo (o None si lo
-# elige el usuario), reward_version resultante, y si usa reward
-# compuesto del paper (para el advisor de reward shaping).
 TRAINER_REGISTRY = {
     "demo": {
         "script": "src/training/demo_train.py",
@@ -65,10 +62,6 @@ TRAINER_REGISTRY = {
     },
 }
 
-# Parámetros de reward por defecto, idénticos a los de PaperGridWorldEnv,
-# usados por el advisor de reward shaping cuando el trainer elegido usa
-# el entorno del paper. Si en el futuro se exponen como flags de CLI,
-# este diccionario es el punto único para actualizarlos.
 DEFAULT_PAPER_REWARD_PARAMS = {
     "arrival_reward": 150.0,
     "goal_stay_reward": 50.0,
@@ -126,13 +119,7 @@ def run_advisors(
     trainer_config: dict,
     effective_algorithm: str,
 ) -> bool:
-    """
-    Ejecuta el advisor histórico y el de reward shaping (si aplica),
-    imprime sus avisos, y devuelve True si el pipeline debe continuar.
 
-    Si algún advisor da un veredicto desfavorable y --skip-advisor no
-    fue pasado, se le pregunta al usuario si quiere continuar.
-    """
     print("\n" + "=" * 70)
     print("Asesor de hiperparámetros (antes de entrenar)")
     print("=" * 70)
@@ -216,8 +203,6 @@ def build_training_command(
 
     command.extend(["--scenario", args.scenario])
 
-    # Los trainers reales con reward del paper no aceptan
-    # --reward-version (la fijan internamente a paper_reward_v1).
     if trainer_config["reward_version"] is None:
         command.extend(["--reward-version", args.reward_version])
 
