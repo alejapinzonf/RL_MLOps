@@ -18,9 +18,6 @@ EXPERIMENT_NAME = "rl_historical_validation"
 
 
 def configure_mlflow():
-    """
-    Configura MLflow para usar una base SQLite local dentro del proyecto.
-    """
     tracking_uri = f"sqlite:///{MLFLOW_DB_PATH}"
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(EXPERIMENT_NAME)
