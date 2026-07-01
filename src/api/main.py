@@ -196,12 +196,6 @@ def check_advisors(request: AdvisorRequest):
 
 
 def _run_training_subprocess(job: TrainingJob, commands: list[list[str]]):
-    """
-    Corre la cadena completa de comandos (entrenar -> validar -> evaluar),
-    guardando cada línea de stdout/stderr a medida que llega. Se detiene
-    si algún paso falla, para no mostrar resultados de un paso previo
-    como si correspondieran a esta corrida.
-    """
     try:
         for command in commands:
             job.append_line(f"\n$ {' '.join(command)}")
@@ -363,7 +357,6 @@ def get_training_result(job_id: str):
 
     return result
 
-
 @app.get("/mlflow-url")
 def get_mlflow_url():
     return {"url": "http://127.0.0.1:5000"}
@@ -406,7 +399,6 @@ def get_history():
         "runs": combined.to_dict(orient="records"),
         "total": len(combined),
     }
-
 
 @app.get("/history/summary")
 def get_history_summary():
@@ -458,10 +450,8 @@ def get_history_summary():
         "by_scenario": by_scenario.where(by_scenario.notna(), None).to_dict(orient="records"),
     }
 
-
 @app.get("/mlflow/status")
 def get_mlflow_status():
-    """Verifica si MLflow UI está corriendo en localhost:5000."""
     import urllib.request
     try:
         urllib.request.urlopen("http://localhost:5000", timeout=1)
