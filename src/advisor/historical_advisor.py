@@ -1,21 +1,5 @@
-"""
-historical_advisor.py
-
-Compara los hiperparámetros que el usuario está a punto de usar para
-entrenar (algoritmo, escenario, episodios) contra el histórico REAL de
-corridas ya ejecutadas (data/raw/historical_results_paper.csv y/o
-data/processed/historical_results_clean.csv), para avisar si es
-probable que la corrida no alcance el desempeño esperado por falta de
-episodios, o si simplemente no hay precedente para comparar.
-
-A diferencia de validate_run.py (que valida una corrida YA ejecutada),
-este advisor corre ANTES de entrenar, sobre los argumentos planeados.
-"""
-
 from pathlib import Path
-
 import pandas as pd
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -24,15 +8,8 @@ HISTORICAL_SOURCES = [
     PROJECT_ROOT / "data" / "raw" / "historical_results_paper.csv",
 ]
 
-
 def load_available_history() -> pd.DataFrame:
-    """
-    Carga y combina todas las fuentes históricas disponibles. Ignora
-    silenciosamente las que no existan (p. ej. si el usuario aún no
-    corrió clean_data.py o import_paper_excels.py).
-    """
     frames = []
-
     for path in HISTORICAL_SOURCES:
         if path.exists():
             try:
@@ -52,19 +29,6 @@ def advise(
     planned_episodes: int,
     reward_version: str | None = None,
 ) -> dict:
-    """
-    Compara planned_episodes contra la distribución real del histórico
-    (percentiles p25/p50/p75) para el mismo algorithm + scenario.
-
-    Clasifica en 4 niveles basados en distribución estadística honesta:
-        - "no_history": sin precedentes comparables
-        - "likely_insufficient": por debajo del p25 histórico
-        - "comparable": entre p25 y p75 histórico
-        - "exceeds_history": por encima del p75 histórico
-
-    También informa sobre la variabilidad del success_rate histórico,
-    para avisar cuando los resultados pasados fueron inconsistentes.
-    """
     history = load_available_history()
 
     if history.empty:
