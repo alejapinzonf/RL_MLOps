@@ -4,7 +4,7 @@ Pipeline completo de MLOps para entrenar, validar y desplegar agentes de Reinfor
  
 ## Algoritmos
  
-Q-Learning tabular · DQN (PyTorch) · Discrete SAC (PyTorch)
+Q-Learning tabular · DQN  · Discrete SAC
  
 ## Escenarios
  
